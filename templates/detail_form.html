@@ -1,0 +1,38 @@
+{{define "content"}}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="/">ホーム</a></li>
+        <li class="breadcrumb-item"><a href="/category/{{.memo.Category.ID}}">{{.memo.Category.Name}}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{.title}}</li>
+    </ol>
+</nav>
+
+<form method="post" action="/detail_execut">
+    <input type="hidden" name="id" value="{{.memo.ID}}">
+    <div class="form-group">
+        <label for="Select1">カテゴリ</label>
+        <select class="form-control" id="Select1" name="category_id">
+            {{range .cates}}
+            {{ if eq .ID $.memo.Category.ID }}
+            <option value="{{.ID}}" selected>{{.Name}}</option>
+            {{else}}
+            <option value="{{.ID}}">{{.Name}}</option>
+            {{end}}
+            {{end}}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="Input1">タイトル</label>
+        <input type="text" class="form-control" id="Input1" name="title" value="{{.title}}">
+    </div>
+    <div class="form-group">
+        <label for="Textarea1">内容</label>
+        <textarea class="form-control" id="Textarea1" name="detail" rows="20">{{.memo.Detail}}</textarea>
+    </div>
+    <div class="btn-group d-flex" role="group" aria-label="group">
+        <button type="submit" class="btn btn-danger w-100 mr-4" name="delete" value="delete" onclick='return confirm("削除してよろしいですか？");'>削除</button>
+        <button type="submit" class="btn btn-primary w-100 mr-4" name="update" value="update">保存</button>
+        <a href="/detail/{{.memo.ID}}" class="btn btn-secondary w-100" role="button">戻る</a>
+    </div>
+</form>
+{{end}}

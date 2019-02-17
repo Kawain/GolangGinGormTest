@@ -1,0 +1,47 @@
+{{define "content"}}
+{{if .top}}
+<div class="jumbotron">
+    <h1 class="display-4">メモ (Gin版)</h1>
+    <p class="lead">Golang 勉強用メモ</p>
+    <hr class="my-4">
+    <p>これはGo言語のWebフレームワーク「Gin」の習作です。「GORM」でSQLiteを使用。</p>
+    <p class="lead">
+        <a class="btn btn-primary btn-lg" href="https://golang.org/" role="button">Learn Golang</a>
+        <a class="btn btn-primary btn-lg" href="https://gin-gonic.com/ja/" role="button">Learn Gin</a>
+        <a class="btn btn-primary btn-lg" href="http://gorm.io/ja_JP/" role="button">Learn GORM</a>
+    </p>
+</div>
+{{else}}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="/">ホーム</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{.title}}</li>
+    </ol>
+</nav>
+
+<h1 class="my-4">{{.title}}</h1>
+{{end}}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>カテゴリ</th>
+            <th>タイトル</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .memos}}
+        <tr>
+            <td>{{.ID}}</td>
+            <td><a href="/category/{{.Category.ID}}">{{.Category.Name}}</a></td>
+            <td><a href="/detail/{{.ID}}">{{.Title}}</a></td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+
+<div class="text-center">
+    <button class="btn btn-dark" onclick="window.scrollTo(0,0);">上に戻る</button>
+</div>
+{{end}}

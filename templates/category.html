@@ -1,0 +1,65 @@
+{{define "content"}}
+<section class="hero is-dark is-bold">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">
+                {{.title}}
+            </h1>
+        </div>
+    </div>
+</section>
+
+<div class="container" style="margin:50px auto;">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="/">ホーム</a></li>
+            <li class="is-active"><a aria-current="page">カテゴリ編集</a></li>
+        </ul>
+    </nav>
+
+    <div class="container" style="margin:50px auto;">
+        <div class="is-pulled-left" style="margin:20px 0;">
+            <form action="/category_insert" method="POST">
+                <div class="field has-addons">
+                    <div class="control">
+                        <button type="submit" class="button is-dark">カテゴリ新規作成</button>
+                    </div>
+                    <div class="control">
+                        <input class="input" type="search" placeholder="カテゴリ名" name="name" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <table class="table is-striped" style="width:100%;">
+            <thead>
+                <tr>
+                    <th class="has-text-centered">ID</th>
+                    <th class="has-text-centered">カテゴリ名</th>
+                    <th class="has-text-centered">編集</th>
+                    <th class="has-text-centered">削除</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .cates2}}
+                <tr>
+                    <td class="has-text-centered">{{.ID}}</td>
+                    <td>
+                        <div class="control">
+                            <input id="id_{{.ID}}" class="input" type="text" value="{{.Name}}">
+                        </div>
+                    </td>
+                    <td class="has-text-centered">
+                        <button class="button is-dark" onclick="execPost('update', {'id':'{{.ID}}'});">編集</button>
+                    </td>
+                    <td class="has-text-centered">
+                        <button class="button is-danger" onclick="execPost('delete', {'id':'{{.ID}}'});">削除</button>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+{{end}}

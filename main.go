@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -55,9 +56,39 @@ func createMyRender() multitemplate.Renderer {
 	r.AddFromFiles("detail_form", "templates/base.html", "templates/detail_form.html")
 	r.AddFromFiles("insert", "templates/base.html", "templates/insert.html")
 	r.AddFromFiles("category", "templates/base.html", "templates/category.html")
-	r.AddFromFiles("about", "templates/base.html", "templates/about.html")
-	r.AddFromFiles("contact", "templates/base.html", "templates/contact.html")
 	return r
+}
+
+// Paginate 構造体
+type Paginate struct {
+	Pages       []uint //数字で回数を指定して繰り返し処理ができないので配列にする
+	CurrentPage uint
+	Limit       uint
+	Offset      uint
+}
+
+// 簡易ページネーション
+func pagination(current uint, total uint) *Paginate {
+	//総ページ数 = Ceil(総件数÷1ページ表示数)
+
+	//1ページ表示数
+	var number uint = 50
+
+	//総ページ数（数字で回数を指定して繰り返し処理ができないので配列にする）
+	pages := int(math.Ceil(float64(total) / float64(number)))
+	var pagesArr []uint
+	for i := 1; i <= pages; i++ {
+		pagesArr = append(pagesArr, uint(i))
+	}
+
+	//構造体生成
+	a := Paginate{
+		Pages:       pagesArr,
+		CurrentPage: current,
+		Limit:       uint(number),
+		Offset:      current*number - number,
+	}
+	return &a
 }
 
 // index
@@ -65,21 +96,42 @@ func index(c *gin.Context) {
 	db := DB()
 	defer db.Close()
 
+	//現ページ取得
+	page := 1
+	if c.Query("page") != "" {
+		var err error
+		page, err = strconv.Atoi(c.Query("page"))
+		if err != nil {
+			c.String(400, "400 Bad Request")
+			return
+		}
+	}
+
 	//Category 複数レコード抽出
 	cates := []Category{}
 	db.Order("name").Find(&cates)
 
 	//Memo 複数レコード抽出
 	memos := []Memo{}
-	db.Preload("Category").Order("id desc").Find(&memos)
+
+	//件数取得
+	count := 0
+	db.Find(&memos).Count(&count)
+
+	//Paginate取得
+	var pageObj = pagination(uint(page), uint(count))
+
+	//データ取得
+	db.Preload("Category").Limit(pageObj.Limit).Offset(pageObj.Offset).Order("id desc").Find(&memos)
 
 	//テンプレートに変数を渡す
 	c.HTML(http.StatusOK, "index", gin.H{
-		"title":  "トップページ",
-		"cateno": 0,
-		"cates":  cates,
-		"memos":  memos,
-		"top":    true,
+		"title":      "トップページ",
+		"cateno":     0,
+		"cates":      cates,
+		"memos":      memos,
+		"top":        true,
+		"pagination": pageObj,
 	})
 }
 
@@ -98,7 +150,6 @@ func search(c *gin.Context) {
 
 	//Memo レコード 複数レコード抽出
 	memos := []Memo{}
-	//db.Preload("Category").Where("category_id = ?", ID).Order("id desc").Find(&memos)
 	if ID == 0 {
 		db.Preload("Category").
 			Where("title LIKE ?", "%"+q+"%").
@@ -318,7 +369,7 @@ func category(c *gin.Context) {
 
 	//テンプレートに変数を渡す
 	c.HTML(http.StatusOK, "category", gin.H{
-		"title":  "カテゴリ編",
+		"title":  "カテゴリ編集",
 		"cateno": 0,
 		"cates":  cates,
 		"cates2": cates2,

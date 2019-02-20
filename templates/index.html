@@ -28,6 +28,7 @@
             <th>ID</th>
             <th>カテゴリ</th>
             <th>タイトル</th>
+            <th>注目度</th>
         </tr>
     </thead>
     <tbody>
@@ -36,6 +37,7 @@
             <td>{{.ID}}</td>
             <td><a href="/category/{{.Category.ID}}">{{.Category.Name}}</a></td>
             <td><a href="/detail/{{.ID}}">{{.Title}}</a></td>
+            <td>{{.Attention}}</td>
         </tr>
         {{end}}
     </tbody>

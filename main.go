@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"math"
 	"net/http"
 	"strconv"
@@ -25,28 +24,29 @@ func DB() *gorm.DB {
 
 // Category 構造体
 type Category struct {
-	ID   uint `gorm:"primary_key"`
-	Name string
+	ID   int    `gorm:"primary_key"`
+	Name string `gorm:"NOT NULL"`
 }
 
 // TableName Categoryのデフォルトテーブル名変更
-func (o *Category) TableName() string {
-	return "category"
-}
+// func (o *Category) TableName() string {
+// 	return "category"
+// }
 
 // Memo 構造体
 type Memo struct {
-	ID         uint `gorm:"primary_key"`
+	ID         int `gorm:"primary_key"`
 	Category   Category
-	CategoryID uint
-	Title      string
-	Detail     string
+	CategoryID int    `gorm:"NOT NULL"`
+	Title      string `gorm:"NOT NULL"`
+	Detail     string `gorm:"DEFAULT:''"`
+	Attention  int    `gorm:"DEFAULT:0"`
 }
 
 // TableName Memoのデフォルトテーブル名変更
-func (o *Memo) TableName() string {
-	return "memo"
-}
+// func (o *Memo) TableName() string {
+// 	return "memo"
+// }
 
 // 複数テンプレート用 これを使用　→　https://github.com/gin-contrib/multitemplate
 func createMyRender() multitemplate.Renderer {
@@ -213,8 +213,11 @@ func detail(c *gin.Context) {
 		return
 	}
 
-	//HTMLのエスケープをしておく
-	memo.Detail = html.EscapeString(memo.Detail)
+	//HTMLのエスケープをしておく（全部マークダウンにするつもりなのでコメントアウト）
+	//memo.Detail = html.EscapeString(memo.Detail)
+
+	//10倍にして返す
+	memo.Attention = memo.Attention * 10
 
 	//テンプレートに変数を渡す
 	c.HTML(http.StatusOK, "detail", gin.H{
@@ -247,12 +250,16 @@ func detailForm(c *gin.Context) {
 		return
 	}
 
+	//0-10までの配列生成
+	attentionArr := make([]int, 11)
+
 	//テンプレートに変数を渡す
 	c.HTML(http.StatusOK, "detail_form", gin.H{
-		"title":  memo.Title,
-		"cateno": 0,
-		"cates":  cates,
-		"memo":   memo,
+		"title":     memo.Title,
+		"cateno":    0,
+		"cates":     cates,
+		"memo":      memo,
+		"attention": attentionArr,
 	})
 }
 
@@ -267,6 +274,8 @@ func detailExecut(c *gin.Context) {
 
 	title := c.PostForm("title")
 	detail := c.PostForm("detail")
+	attention, _ := strconv.Atoi(c.PostForm("attention"))
+
 	delete := c.PostForm("delete")
 	update := c.PostForm("update")
 
@@ -291,9 +300,10 @@ func detailExecut(c *gin.Context) {
 		//Memo 単一レコード
 		memo := Memo{}
 		db.Where("id = ?", ID).First(&memo)
-		memo.CategoryID = uint(categoryID)
+		memo.CategoryID = categoryID
 		memo.Title = title
 		memo.Detail = detail
+		memo.Attention = attention
 
 		//トランザクション
 		tx := db.Begin()
@@ -324,11 +334,15 @@ func insert(c *gin.Context) {
 	cates := []Category{}
 	db.Order("name").Find(&cates)
 
+	//0-10までの配列生成
+	attentionArr := make([]int, 11)
+
 	//テンプレートに変数を渡す
 	c.HTML(http.StatusOK, "insert", gin.H{
-		"title":  "新規追加",
-		"cateno": 0,
-		"cates":  cates,
+		"title":     "新規追加",
+		"cateno":    0,
+		"cates":     cates,
+		"attention": attentionArr,
 	})
 }
 
@@ -341,12 +355,14 @@ func insertExecut(c *gin.Context) {
 	categoryID, _ := strconv.Atoi(c.PostForm("category_id"))
 	title := c.PostForm("title")
 	detail := c.PostForm("detail")
+	attention, _ := strconv.Atoi(c.PostForm("attention"))
 
 	//Insert
 	obj := Memo{
-		CategoryID: uint(categoryID),
+		CategoryID: categoryID,
 		Title:      title,
 		Detail:     detail,
+		Attention:  attention,
 	}
 	db.Create(&obj)
 

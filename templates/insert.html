@@ -22,9 +22,18 @@
         <input type="text" class="form-control" id="Input1" name="title" required>
     </div>
     <div class="form-group">
-        <label for="Textarea1">内容</label>
+        <label for="Textarea1">内容（Markdown記法）</label>
         <textarea class="form-control" id="Textarea1" name="detail" rows="20" required></textarea>
     </div>
+    <div class="form-group">
+        <label for="Select2">注目度</label>
+        <select class="form-control" id="Select2" name="attention" required>
+            {{range $i, $v := .attention}}
+            <option value="{{$i}}">{{$i}}</option>
+            {{end}}
+        </select>
+    </div>
+
     <div class="btn-group d-flex" role="group" aria-label="group">
         <button type="submit" class="btn btn-primary w-100">保存</button>
     </div>

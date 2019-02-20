@@ -9,30 +9,22 @@
 
 <h1 class="my-4">{{.title}}</h1>
 
-<pre class="box" id="box" style="padding:10px;"></pre>
+<div class="progress">
+    <div class="progress-bar" role="progressbar" style="width: {{.memo.Attention}}%;" aria-valuenow="{{.memo.Attention}}"
+        aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+
+<div class="box" id="box" style="padding:10px;"></div>
 
 <div class="btn-group d-flex" role="group" aria-label="group">
-    <button id="markdown" class="btn btn-dark w-100 mr-4">Markdown</button>
-    <button id="normal" class="btn btn-dark w-100 mr-4">Normal</button>
     <a href="/detail/{{.memo.ID}}/form" class="btn btn-primary w-100" role="button">編集</a>
 </div>
 
+
 <script>
     const detail = '{{.memo.Detail}}';
-    //マークダウン記法
-    function Markdown() {
-        document.getElementById('box').innerHTML = marked(detail);
-    }
-
-    //ノーマル
-    function Normal() {
-        document.getElementById('box').innerHTML = detail;
-    }
-
     window.onload = function () {
-        document.getElementById('box').innerHTML = detail;
-        document.getElementById("markdown").addEventListener("click", Markdown, false)
-        document.getElementById("normal").addEventListener("click", Normal, false)
+        document.getElementById('box').innerHTML = marked(detail);
     }
 </script>
 {{end}}

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"net/http"
 	"strconv"
@@ -12,9 +14,17 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
+//sqlite3ファイル名
+var filename string
+
+// Config 構造体
+type Config struct {
+	Path string `json:"path"`
+}
+
 // DB 接続
 func DB() *gorm.DB {
-	db, err := gorm.Open("sqlite3", "notes.db")
+	db, err := gorm.Open("sqlite3", filename)
 	if err != nil {
 		panic("データベース接続失敗")
 	}
@@ -467,6 +477,21 @@ func categoryDelete(c *gin.Context) {
 }
 
 func main() {
+	// 設定ファイルを読み込む
+	config := Config{}
+
+	jsonString, err := ioutil.ReadFile("config.json")
+	if err != nil {
+		panic("config.json が読み込めません")
+	}
+
+	err = json.Unmarshal(jsonString, &config)
+	if err != nil {
+		panic("json.Unmarshal エラー")
+	}
+
+	filename = config.Path
+
 	router := gin.Default()
 	router.HTMLRender = createMyRender()
 	//静的ファイル
